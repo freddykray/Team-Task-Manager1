@@ -2,12 +2,10 @@ package com.example.Team.Task.Manager.service;
 
 import com.example.Team.Task.Manager.dtoTask.*;
 import com.example.Team.Task.Manager.entity.Project;
-import com.example.Team.Task.Manager.entity.Role;
 import com.example.Team.Task.Manager.entity.Task;
 import com.example.Team.Task.Manager.entity.User;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.TaskRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +34,7 @@ public class TaskService {
         List<Task> tasks = taskRepository.findAllByProject(project);
 
         boolean existTaskName = tasks.stream().anyMatch(name -> name.getTitle().equals(dto.getTitle()));
-
+        User assignee = entityFinderService.getUserByName(dto.getAssignee());
         if (existTaskName){
             throw new RuntimeException("Такое имя задания уже занято!");
         }
@@ -45,6 +43,7 @@ public class TaskService {
         task.setStatus(dto.getStatus());
         task.setProject(project);
         task.setDatetime(LocalDateTime.now());
+        task.setAssignee(assignee);
         Task savedTask = taskRepository.save(task);
         project.getProjectTasks().add(savedTask);
         projectRepository.save(project);
