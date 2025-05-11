@@ -5,7 +5,7 @@ import com.example.Team.Task.Manager.dtoProject.ProjectResponse;
 import com.example.Team.Task.Manager.dtoProject.ProjectRoleResponse;
 import com.example.Team.Task.Manager.dtoTask.TaskResponse;
 import com.example.Team.Task.Manager.entity.Project;
-import com.example.Team.Task.Manager.entity.Role;
+
 import com.example.Team.Task.Manager.entity.Task;
 import com.example.Team.Task.Manager.entity.UserProject;
 import org.springframework.stereotype.Component;
@@ -45,6 +45,7 @@ public class ProjectMapper {
         taskResponse.setDescription(task.getDescription());
         taskResponse.setStatus(task.getStatus());
         taskResponse.setCreatedAt(task.getDatetime());
+        taskResponse.setAssignee(task.getAssignee().getUsername());
         return taskResponse;
     }
 
