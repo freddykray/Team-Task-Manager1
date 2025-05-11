@@ -73,4 +73,11 @@ public class EntityFinderService {
                 .orElseThrow(() -> new EntityNotFoundException("Задача с именем " + dto + " в проекте не найдена"));
         return task;
     }
+    public Optional<UserProject> userInProject(User user, Project project) {
+        Optional<UserProject> userProjectOptional = userProjectRepository.findByUserAndProject(user, project);
+        if (userProjectOptional.isEmpty()) {
+            throw new RuntimeException("Пользователь не связан с этим проектом");
+        }
+        return userProjectOptional;
+    }
 }
