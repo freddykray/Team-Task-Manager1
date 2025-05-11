@@ -32,6 +32,11 @@ public class Task {
     @JsonBackReference
     private Project project;
 
+    @ManyToOne
+    @JoinColumn(name = "assignee_id", nullable = false) // Внешний ключ на пользователя, который является владельцем проекта
+    @JsonBackReference
+    private User assignee;
+
     @Column(name = "date_time")
     private LocalDateTime datetime;
 
