@@ -4,6 +4,7 @@ import com.example.Team.Task.Manager.dtoTask.*;
 import com.example.Team.Task.Manager.entity.Project;
 import com.example.Team.Task.Manager.entity.Task;
 import com.example.Team.Task.Manager.entity.User;
+import com.example.Team.Task.Manager.entity.UserProject;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 
@@ -35,6 +37,9 @@ public class TaskService {
 
         boolean existTaskName = tasks.stream().anyMatch(name -> name.getTitle().equals(dto.getTitle()));
         User assignee = entityFinderService.getUserByName(dto.getAssignee());
+
+        Optional<UserProject> userProjectOptional = entityFinderService.userInProject(assignee,project);
+
         if (existTaskName){
             throw new RuntimeException("Такое имя задания уже занято!");
         }
