@@ -33,6 +33,8 @@ public class TaskController {
     @PutMapping("/updateStatus")
     public void updateStatusTask(@RequestBody UpdateStatus dto){
         taskService.updateStatusTask(dto);
+        String message = String.format("Task status updated: %s", dto.getStatus().toString());
+        kafkaProducerService.sendMessage(message);
     }
 
 
