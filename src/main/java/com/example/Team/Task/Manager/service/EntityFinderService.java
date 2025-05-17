@@ -1,25 +1,22 @@
 package com.example.Team.Task.Manager.service;
 
-import com.example.Team.Task.Manager.dtoTask.DeleteTaskDTO;
-import com.example.Team.Task.Manager.dtoTask.UpdateDescription;
 import com.example.Team.Task.Manager.entity.*;
-import com.example.Team.Task.Manager.mapper.ProjectMapper;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
-import com.example.Team.Task.Manager.repository.TaskRepository;
 import com.example.Team.Task.Manager.repository.UserProjectRepository;
 import com.example.Team.Task.Manager.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class EntityFinderService {
+
     @Autowired
     private ProjectRepository projectRepository;
 
@@ -28,8 +25,6 @@ public class EntityFinderService {
 
     @Autowired
     private UserProjectRepository userProjectRepository;
-
-
 
     public boolean isUserOwner(Project project) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
