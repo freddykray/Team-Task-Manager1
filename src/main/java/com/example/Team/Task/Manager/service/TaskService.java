@@ -1,10 +1,7 @@
 package com.example.Team.Task.Manager.service;
 
 import com.example.Team.Task.Manager.dtoTask.*;
-import com.example.Team.Task.Manager.entity.Project;
-import com.example.Team.Task.Manager.entity.Task;
-import com.example.Team.Task.Manager.entity.User;
-import com.example.Team.Task.Manager.entity.UserProject;
+import com.example.Team.Task.Manager.entity.*;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +14,10 @@ import java.util.Optional;
 @Service
 
 public class TaskService {
+
     @Autowired
     private TaskRepository taskRepository;
+
     @Autowired
     private ProjectRepository projectRepository;
 
@@ -90,8 +89,7 @@ public class TaskService {
     }
 
     public void updateStatusTask(UpdateStatus dto){ // сделать выбор статусов
-        Project project = entityFinderService.getProjectByName(dto.getTitleTask());
-
+        Project project = entityFinderService.getProjectByName(dto.getProjectName());
         Task findTask = entityFinderService.getTaskInProject(project,dto.getTitleTask());
         findTask.setStatus(dto.getStatus());
         taskRepository.save(findTask);
