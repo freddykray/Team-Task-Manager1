@@ -59,7 +59,7 @@ public class EntityFinderService {
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с именем " + user + " не найден"));
         return user1;
     }
-    public List<Project> getAllUserInProject(User user){
+    public List<Project> findProjectsByUser(User user){
         List<Project> projects = userProjectRepository.findAllByUser(user)
                 .stream()
                 .map(UserProject::getProject)
