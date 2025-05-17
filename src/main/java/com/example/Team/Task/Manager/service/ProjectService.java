@@ -7,16 +7,13 @@ import com.example.Team.Task.Manager.entity.User;
 import com.example.Team.Task.Manager.entity.UserProject;
 import com.example.Team.Task.Manager.mapper.ProjectMapper;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
-import com.example.Team.Task.Manager.repository.TaskRepository;
 import com.example.Team.Task.Manager.repository.UserProjectRepository;
-import com.example.Team.Task.Manager.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -50,7 +47,7 @@ public class ProjectService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Project project = new Project();
         User user = entityFinderService.getUserByName(authentication.getName());
-        List<Project> projects = entityFinderService.getAllUserInProject(user);
+        List<Project> projects = entityFinderService.findProjectsByUser(user);
         boolean nameExist = projects.stream().anyMatch(name -> name.getName().equals(dto.getProjectName()));
 
         if(nameExist){
@@ -84,7 +81,7 @@ public class ProjectService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         User user = entityFinderService.getUserByName(authentication.getName());
-        List<Project> projects = entityFinderService.getAllUserInProject(user);
+        List<Project> projects = entityFinderService.findProjectsByUser(user);
 
         return projects.stream()
                 .map(projectMapper::createProjectDto) // преобразуем каждый проект в DTO
@@ -119,6 +116,7 @@ public class ProjectService {
         projectRepository.save(project);
 
     }
+
     @Transactional
     public void addUserToProject(AddUserInProject dto) {
         // Поиск проекта по имени
@@ -146,10 +144,8 @@ public class ProjectService {
         if (!entityFinderService.isUserOwner(project)){
             throw new RuntimeException("Вы не являетесь владельцем проекта!");
         }
-        Optional<UserProject> userProjectOptional = userProjectRepository.findByUserAndProject(user, project);
-        if (userProjectOptional.isEmpty()) {
-            throw new RuntimeException("Пользователь не связан с этим проектом");
-        }
+        Optional<UserProject> userProjectOptional = entityFinderService.userInProject(user,project);
+
         UserProject userProject = userProjectOptional.get();
         project.getUserProjects().remove(userProject);
         userProjectRepository.delete(userProject);
