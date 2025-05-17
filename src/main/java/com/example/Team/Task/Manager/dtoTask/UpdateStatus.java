@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class UpdateStatus {
+    private String projectName;
     private String titleTask;
     private TaskStatus status;
 
