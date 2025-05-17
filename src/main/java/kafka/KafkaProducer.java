@@ -11,5 +11,9 @@ public class KafkaProducer {
     @Autowired
     private final KafkaTemplate<String, String> kafkaTemplate;
 
+    public void  sendMessage(String message){
+        kafkaTemplate.send("notification", message);
+    }
+
 
 }
