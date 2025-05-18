@@ -2,9 +2,14 @@ package com.example.Team.Task.Manager.service;
 
 import com.example.Team.Task.Manager.dtoTask.*;
 import com.example.Team.Task.Manager.entity.*;
+import com.example.Team.Task.Manager.kafka.KafkaProducer;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.TaskRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-
+@AllArgsConstructor
 public class TaskService {
 
     @Autowired
@@ -23,6 +28,8 @@ public class TaskService {
 
     @Autowired
     private EntityFinderService entityFinderService;
+
+    private final KafkaProducer kafkaProducerService;
 
     public Task createTask(TaskRequest dto){
         if(!entityFinderService.isUserOwnerAndAdmin(dto.getNameProject())){
@@ -98,7 +105,7 @@ public class TaskService {
         mail.setTo(emailUser);
         mail.setBody("Team Task Manager");
         mail.setSubject(String.format("В вашем проекте '%s' статус задачи '%s' был изменен на %s",project.getName(),findTask.getTitle(),dto.getStatus()));
-        kafkaProducerService.sendMessage(emailUser);
+        kafkaProducerService.sendMail(mail);
         findTask.setStatus(dto.getStatus());
         taskRepository.save(findTask);
     }
