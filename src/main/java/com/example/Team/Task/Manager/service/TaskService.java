@@ -91,6 +91,14 @@ public class TaskService {
     public void updateStatusTask(UpdateStatus dto){ // сделать выбор статусов
         Project project = entityFinderService.getProjectByName(dto.getProjectName());
         Task findTask = entityFinderService.getTaskInProject(project,dto.getTitleTask());
+        Mail mail = new Mail();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user1 = entityFinderService.getUserByName(authentication.getName());
+        String emailUser = user1.getEmail();
+        mail.setTo(emailUser);
+        mail.setBody("Team Task Manager");
+        mail.setSubject(String.format("В вашем проекте '%s' статус задачи '%s' был изменен на %s",project.getName(),findTask.getTitle(),dto.getStatus()));
+        kafkaProducerService.sendMessage(emailUser);
         findTask.setStatus(dto.getStatus());
         taskRepository.save(findTask);
     }
