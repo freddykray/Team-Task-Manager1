@@ -1,6 +1,5 @@
 package com.example.Team.Task.Manager.entity;
 
-import jakarta.persistence.Entity;
 import lombok.Data;
 
 @Data
