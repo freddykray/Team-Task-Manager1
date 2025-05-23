@@ -53,7 +53,7 @@ public class TaskService {
         task.setDescription(dto.getDescription());
         task.setStatus(dto.getStatus());
         task.setProject(project);
-        task.setDatetime(LocalDateTime.now());
+        task.setDatetime(dto.getDateTime());
         task.setAssignee(assignee);
         Task savedTask = taskRepository.save(task);
         project.getProjectTasks().add(savedTask);

@@ -10,7 +10,7 @@ public class TaskResponse {
     private String title;
     private String description;
     private TaskStatus status;
-    private LocalDateTime createdAt;
+    private String createdAt;
     private String assignee;
 
 }

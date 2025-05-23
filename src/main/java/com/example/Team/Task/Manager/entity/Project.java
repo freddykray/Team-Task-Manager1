@@ -31,6 +31,7 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> projectTasks = new ArrayList<>();
 
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProject> userProjects = new ArrayList<>();
 
@@ -38,6 +39,4 @@ public class Project {
     public String getOwnerUsername() {
         return owner.getUsername();
     }
-
-
 }
