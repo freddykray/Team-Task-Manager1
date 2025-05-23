@@ -4,5 +4,6 @@ public enum TaskStatus {
     NEW,          // Новая задача
     IN_PROGRESS,  // В работе
     DONE,         // Завершена
-    CANCELLED
+    CANCELLED,
+    OVERDUE
 }
