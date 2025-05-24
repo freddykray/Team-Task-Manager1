@@ -5,6 +5,7 @@ import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.UserProjectRepository;
 import com.example.Team.Task.Manager.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,16 +16,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class EntityFinderService {
+@AllArgsConstructor
+public class EntityFinderService implements EntityFinder {
 
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UserProjectRepository userProjectRepository;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final UserProjectRepository userProjectRepository;
 
     public boolean isUserOwner(Project project) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

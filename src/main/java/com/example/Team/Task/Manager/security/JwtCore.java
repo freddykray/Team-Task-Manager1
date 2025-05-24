@@ -1,17 +1,13 @@
 package com.example.Team.Task.Manager.security;
 
 
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import io.jsonwebtoken.*;
+
 import io.jsonwebtoken.Jwts;
-
-
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 
@@ -28,7 +24,9 @@ public class JwtCore {
     public String generateToken(Authentication authentication){
 
         UserDetailsImpl userDetails =(UserDetailsImpl) authentication.getPrincipal();
-        return Jwts.builder().setSubject((userDetails.getUsername())).setIssuedAt(new Date())
+        return Jwts.builder()
+                .setSubject((userDetails.getUsername()))
+                .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + lifeTime))
                 .signWith(SignatureAlgorithm.HS256,secret)
                 .compact();

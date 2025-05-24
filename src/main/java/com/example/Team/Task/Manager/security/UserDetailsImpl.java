@@ -20,10 +20,6 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
     private Role roles;
 
-
-
-
-
     public static UserDetailsImpl build(User user){
     return new UserDetailsImpl(
             user.getId(),
@@ -33,7 +29,6 @@ public class UserDetailsImpl implements UserDetails {
             user.getRoles()
 
     );
-
     }
 
     @Override

@@ -1,19 +1,14 @@
 package com.example.Team.Task.Manager.service;
 
 import com.example.Team.Task.Manager.dtoProject.*;
-import com.example.Team.Task.Manager.entity.Project;
-import com.example.Team.Task.Manager.entity.Role;
-import com.example.Team.Task.Manager.entity.User;
-import com.example.Team.Task.Manager.entity.UserProject;
+import com.example.Team.Task.Manager.entity.*;
 import com.example.Team.Task.Manager.mapper.ProjectMapper;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.UserProjectRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,134 +21,131 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ProjectService {
 
-    @Autowired
-    private EntityFinderService entityFinderService;
+    private final EntityFinder entityFinder;
+    private final ProjectRepository projectRepository;
+    private final UserProjectRepository userProjectRepository;
+    private final ProjectMapper projectMapper;
 
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private UserProjectRepository userProjectRepository;
-
-    @Autowired
-    private ProjectMapper projectMapper;
-
-
-
-
+    /**
+     * Создание нового проекта и установка текущего пользователя владельцем.
+     */
     @Transactional
-    public ProjectResponse createProject(ProjectRequest dto){
-
+    public ProjectResponse createProject(ProjectRequest dto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Project project = new Project();
-        User user = entityFinderService.getUserByName(authentication.getName());
-        List<Project> projects = entityFinderService.findProjectsByUser(user);
-        boolean nameExist = projects.stream().anyMatch(name -> name.getName().equals(dto.getProjectName()));
+        User user = entityFinder.getUserByName(authentication.getName());
 
-        if(nameExist){
+        // Проверка на дублирование имени проекта
+        boolean nameExists = entityFinder.findProjectsByUser(user).stream()
+                .anyMatch(project -> project.getName().equals(dto.getProjectName()));
+        if (nameExists) {
             throw new RuntimeException("Такое имя уже занято!");
         }
 
-
+        // Создание и сохранение проекта
+        Project project = new Project();
         project.setName(dto.getProjectName());
         project.setOwner(user);
         project.setDatetime(LocalDateTime.now());
 
-        Project saved = projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
 
+        // Связь пользователь - проект
         UserProject userProject = new UserProject();
-
         userProject.setUser(user);
         userProject.setProject(project);
         userProject.setRole(Role.ROLE_OWNER);
 
-        if (userProject.getRole() == null) {
-            throw new IllegalStateException("Роль не может быть пустой");
-        }
-
         userProjectRepository.save(userProject);
-
-        return projectMapper.createProjectDto(saved);
+        return projectMapper.createProjectDto(savedProject);
     }
 
-
-    public List<ProjectResponse> allUserProject(){
+    /**
+     * Получение всех проектов текущего пользователя.
+     */
+    public List<ProjectResponse> allUserProject() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = entityFinder.getUserByName(authentication.getName());
 
-        User user = entityFinderService.getUserByName(authentication.getName());
-        List<Project> projects = entityFinderService.findProjectsByUser(user);
-
+        List<Project> projects = entityFinder.findProjectsByUser(user);
         return projects.stream()
-                .map(projectMapper::createProjectDto) // преобразуем каждый проект в DTO
+                .map(projectMapper::createProjectDto)
                 .collect(Collectors.toList());
     }
-    @Transactional
-    public void deleteProject(String nameProject){
-        Project project = entityFinderService.getProjectByName(nameProject);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = entityFinderService.getUserByName(authentication.getName());
 
-        if (!entityFinderService.isUserOwner(project)){
+    /**
+     * Удаление проекта, если текущий пользователь — владелец.
+     */
+    @Transactional
+    public void deleteProject(String nameProject) {
+        Project project = entityFinder.getProjectByName(nameProject);
+
+        if (!entityFinder.isUserOwner(project)) {
             throw new RuntimeException("Вы не являетесь владельцем этого проекта!");
         }
 
-        // Удаляем связи пользователей с проектом
+        // Удаляем все связи с пользователями
         for (UserProject userProject : new ArrayList<>(project.getUserProjects())) {
-            User u = userProject.getUser();
-            u.getUserProjects().remove(userProject);  // корректно удаляем UserProject
+            userProject.getUser().getUserProjects().remove(userProject);
         }
 
         userProjectRepository.deleteAll(project.getUserProjects());
         projectRepository.delete(project);
     }
-    public void nameProjectUpdate(ProjectRequestUpdate dto){
-        Project project = entityFinderService.getProjectByName(dto.getProjectName());
 
-        if (!entityFinderService.isUserOwnerAndAdmin(project.getName())){
+    /**
+     * Обновление названия проекта.
+     */
+    public void nameProjectUpdate(ProjectRequestUpdate dto) {
+        Project project = entityFinder.getProjectByName(dto.getProjectName());
+
+        if (!entityFinder.isUserOwnerAndAdmin(project.getName())) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
+
         project.setName(dto.getNewProjectName());
         projectRepository.save(project);
-
     }
 
+    /**
+     * Добавление пользователя в проект.
+     */
     @Transactional
     public void addUserToProject(AddUserInProject dto) {
-        // Поиск проекта по имени
-        Project project = entityFinderService.getProjectByName(dto.getNameProject());
-
-        // Поиск пользователя по имени пользователя
-        User user = entityFinderService.getUserByName(dto.getUsername());
+        Project project = entityFinder.getProjectByName(dto.getNameProject());
+        User user = entityFinder.getUserByName(dto.getUsername());
 
         boolean alreadyAdded = userProjectRepository.existsByUserAndProject(user, project);
         if (alreadyAdded) {
             throw new IllegalStateException("Пользователь уже добавлен в проект");
         }
+
         UserProject userProject = new UserProject();
         userProject.setUser(user);
         userProject.setProject(project);
         userProject.setRole(dto.getRole());
+
         userProjectRepository.save(userProject);
     }
 
-    public void deleteUser(DeleteUser dto){
-        Project project = entityFinderService.getProjectByName(dto.getNameProject());
-        User user = entityFinderService.getUserByName(dto.getUsername());
+    /**
+     * Удаление пользователя из проекта владельцем.
+     */
+    public void deleteUser(DeleteUser dto) {
+        Project project = entityFinder.getProjectByName(dto.getNameProject());
+        User user = entityFinder.getUserByName(dto.getUsername());
 
-
-        if (!entityFinderService.isUserOwner(project)){
+        if (!entityFinder.isUserOwner(project)) {
             throw new RuntimeException("Вы не являетесь владельцем проекта!");
         }
-        Optional<UserProject> userProjectOptional = entityFinderService.userInProject(user,project);
+
+        Optional<UserProject> userProjectOptional = entityFinder.userInProject(user, project);
+        if (userProjectOptional.isEmpty()) {
+            throw new RuntimeException("Пользователь не найден в проекте!");
+        }
 
         UserProject userProject = userProjectOptional.get();
         project.getUserProjects().remove(userProject);
         userProjectRepository.delete(userProject);
         projectRepository.save(project);
-
     }
-
-
-
-
 }

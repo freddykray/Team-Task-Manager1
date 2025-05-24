@@ -19,7 +19,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/deleteTask")
-    public void deleteTask(@RequestBody DeleteTaskDTO dto){
+    public void deleteTask(@RequestBody DeleteTask dto){
         taskService.deleteTask(dto);
     }
     @PutMapping("/updateTaskName")

@@ -1,18 +1,25 @@
 package com.example.Team.Task.Manager.service;
 
-import com.example.Team.Task.Manager.dtoTask.*;
-import com.example.Team.Task.Manager.entity.*;
+
+import com.example.Team.Task.Manager.dtoTask.DeleteTask;
+import com.example.Team.Task.Manager.dtoTask.TaskRequest;
+import com.example.Team.Task.Manager.dtoTask.UpdateDescription;
+import com.example.Team.Task.Manager.dtoTask.UpdateNameTask;
+import com.example.Team.Task.Manager.dtoTask.UpdateStatus;
+import com.example.Team.Task.Manager.entity.Mail;
+import com.example.Team.Task.Manager.entity.Project;
+import com.example.Team.Task.Manager.entity.Task;
+import com.example.Team.Task.Manager.entity.User;
+import com.example.Team.Task.Manager.entity.UserProject;
 import com.example.Team.Task.Manager.kafka.KafkaProducer;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.TaskRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,99 +27,104 @@ import java.util.Optional;
 @AllArgsConstructor
 public class TaskService {
 
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private EntityFinderService entityFinderService;
-
+    private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final EntityFinder entityFinder;
     private final KafkaProducer kafkaProducerService;
 
-    public Task createTask(TaskRequest dto){
-        if(!entityFinderService.isUserOwnerAndAdmin(dto.getNameProject())){
+    public Task createTask(TaskRequest dto) {
+        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
-        Task task = new Task();
 
-        Project project = entityFinderService.getProjectByName(dto.getNameProject());
-
+        Project project = entityFinder.getProjectByName(dto.getNameProject());
         List<Task> tasks = taskRepository.findAllByProject(project);
 
-        boolean existTaskName = tasks.stream().anyMatch(name -> name.getTitle().equals(dto.getTitle()));
-        User assignee = entityFinderService.getUserByName(dto.getAssignee());
+        boolean existTaskName = tasks.stream()
+                .anyMatch(task -> task.getTitle().equals(dto.getTitle()));
 
-        Optional<UserProject> userProjectOptional = entityFinderService.userInProject(assignee,project);
-
-        if (existTaskName){
+        if (existTaskName) {
             throw new RuntimeException("Такое имя задания уже занято!");
         }
+
+        User assignee = entityFinder.getUserByName(dto.getAssignee());
+        Optional<UserProject> userProjectOptional = entityFinder.userInProject(assignee, project);
+
+        Task task = new Task();
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setStatus(dto.getStatus());
         task.setProject(project);
         task.setDatetime(dto.getDateTime());
         task.setAssignee(assignee);
+
         Task savedTask = taskRepository.save(task);
         project.getProjectTasks().add(savedTask);
         projectRepository.save(project);
 
-       return savedTask;
+        return savedTask;
     }
-    public void deleteTask(DeleteTaskDTO dto){
-        if(!entityFinderService.isUserOwnerAndAdmin(dto.getNameProject())){
+
+    public void deleteTask(DeleteTask dto) {
+        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
 
-        Project project = entityFinderService.getProjectByName(dto.getNameProject());
-
-        Task deleteTask = entityFinderService.getTaskInProject(project,dto.getNameTask());
+        Project project = entityFinder.getProjectByName(dto.getNameProject());
+        Task deleteTask = entityFinder.getTaskInProject(project, dto.getNameTask());
 
         project.getProjectTasks().remove(deleteTask);
         projectRepository.save(project);
         taskRepository.delete(deleteTask);
-
     }
-    public void updateNameTask(UpdateNameTask dto){
-        if(!entityFinderService.isUserOwnerAndAdmin(dto.getNameProject())){
+
+    public void updateNameTask(UpdateNameTask dto) {
+        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
-        Project project = entityFinderService.getProjectByName(dto.getNameProject());
-        Task task = entityFinderService.getTaskInProject(project,dto.getOldNameTask());
+
+        Project project = entityFinder.getProjectByName(dto.getNameProject());
+        Task task = entityFinder.getTaskInProject(project, dto.getOldNameTask());
 
         task.setTitle(dto.getNewNameTask());
         taskRepository.save(task);
-
-
-    }
-    public void updateDescriptionTask(UpdateDescription dto){
-        Project project = entityFinderService.getProjectByName(dto.getNameProject());
-
-        Task findTask = entityFinderService.getTaskInProject(project,dto.getNameTask());
-        findTask.setDescription(dto.getNewDescription());
-        taskRepository.save(findTask);
     }
 
-    public void updateStatusTask(UpdateStatus dto){ // сделать выбор статусов
-        Project project = entityFinderService.getProjectByName(dto.getProjectName());
-        Task findTask = entityFinderService.getTaskInProject(project,dto.getTitleTask());
-        Mail mail = new Mail();
+    public void updateDescriptionTask(UpdateDescription dto) {
+        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
+            throw new RuntimeException("У вас недостаточно прав!");
+        }
+
+        Project project = entityFinder.getProjectByName(dto.getNameProject());
+        Task task = entityFinder.getTaskInProject(project, dto.getNameTask());
+
+        task.setDescription(dto.getNewDescription());
+        taskRepository.save(task);
+    }
+
+    public void updateStatusTask(UpdateStatus dto) {
+        Project project = entityFinder.getProjectByName(dto.getProjectName());
+        Task task = entityFinder.getTaskInProject(project, dto.getTitleTask());
+
+        // Получаем текущего пользователя
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user1 = entityFinderService.getUserByName(authentication.getName());
-        String emailUser = user1.getEmail();
-        mail.setTo(emailUser);
-        mail.setBody("Team Task Manager");
-        mail.setSubject(String.format("В вашем проекте '%s' статус задачи '%s' был изменен на %s",project.getName(),findTask.getTitle(),dto.getStatus()));
+        User user = entityFinder.getUserByName(authentication.getName());
+
+        // Подготовка письма
+        Mail mail = new Mail();
+        mail.setTo(user.getEmail());
+        mail.setSubject("Team Task Manager");
+        mail.setBody(String.format(
+                "В вашем проекте '%s' статус задачи '%s' был изменен на %s",
+                project.getName(),
+                task.getTitle(),
+                dto.getStatus()
+        ));
+
         kafkaProducerService.sendMail(mail);
-        findTask.setStatus(dto.getStatus());
-        taskRepository.save(findTask);
+
+        // Обновляем статус задачи
+        task.setStatus(dto.getStatus());
+        taskRepository.save(task);
     }
-
-
-
-
-
-
 }
