@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ProjectRequestUpdate {
-    private String projectName;
+
     private String newProjectName;
 }

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class TaskRequest {
-    private String nameProject;
+
     private String title;
     private String description;
     private TaskStatus status;

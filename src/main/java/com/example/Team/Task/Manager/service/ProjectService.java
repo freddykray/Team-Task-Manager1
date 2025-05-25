@@ -76,10 +76,10 @@ public class ProjectService {
      * Удаление проекта, если текущий пользователь — владелец.
      */
     @Transactional
-    public void deleteProject(String nameProject) {
-        Project project = entityFinder.getProjectByName(nameProject);
+    public void deleteProject(Long projectId) {
+        Project project = entityFinder.findById(projectId);
 
-        if (!entityFinder.isUserOwner(project)) {
+        if (!entityFinder.isUserOwner(projectId)) {
             throw new RuntimeException("Вы не являетесь владельцем этого проекта!");
         }
 
@@ -95,10 +95,10 @@ public class ProjectService {
     /**
      * Обновление названия проекта.
      */
-    public void nameProjectUpdate(ProjectRequestUpdate dto) {
-        Project project = entityFinder.getProjectByName(dto.getProjectName());
+    public void nameProjectUpdate(Long projectId, ProjectRequestUpdate dto) {
+        Project project = entityFinder.findById(projectId);
 
-        if (!entityFinder.isUserOwnerAndAdmin(project.getName())) {
+        if (!entityFinder.isUserOwnerAndAdmin(projectId)) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
 
@@ -110,8 +110,14 @@ public class ProjectService {
      * Добавление пользователя в проект.
      */
     @Transactional
-    public void addUserToProject(AddUserInProject dto) {
-        Project project = entityFinder.getProjectByName(dto.getNameProject());
+    public void addUserToProject(Long projectId, AddUserInProject dto) {
+
+        Project project = entityFinder.findById(projectId);
+
+        if (!entityFinder.isUserOwnerAndAdmin(projectId)) {
+            throw new RuntimeException("У вас недостаточно прав!");
+        }
+
         User user = entityFinder.getUserByName(dto.getUsername());
 
         boolean alreadyAdded = userProjectRepository.existsByUserAndProject(user, project);
@@ -130,11 +136,11 @@ public class ProjectService {
     /**
      * Удаление пользователя из проекта владельцем.
      */
-    public void deleteUser(DeleteUser dto) {
-        Project project = entityFinder.getProjectByName(dto.getNameProject());
+    public void deleteUser(Long projectId,DeleteUser dto) {
+        Project project = entityFinder.findById(projectId);
         User user = entityFinder.getUserByName(dto.getUsername());
 
-        if (!entityFinder.isUserOwner(project)) {
+        if (!entityFinder.isUserOwner(projectId)) {
             throw new RuntimeException("Вы не являетесь владельцем проекта!");
         }
 

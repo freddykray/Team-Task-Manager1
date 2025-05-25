@@ -12,16 +12,16 @@ public interface EntityFinder {
 
     User getUserByName(String username);
 
-    Optional<Project> findByUserIdAndProjectName(Long userId,  String projectName);
+    Project findById(Long projectId);
 
-    boolean isUserOwner(Project project);
+    boolean isUserOwner(Long projectId);
 
-    boolean isUserOwnerAndAdmin(String projectName);
+    boolean isUserOwnerAndAdmin(Long projectId);
 
     List<Project> findProjectsByUser(User user);
 
     Optional<UserProject> userInProject(User user, Project project);
 
-    Task getTaskInProject(Project project, String dto);
+    Task getTaskByIdInProject(Long projectId, Long taskId);
 
 }

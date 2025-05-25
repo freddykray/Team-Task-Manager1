@@ -13,26 +13,35 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    @PostMapping("/addTask")
-    public Task createTask(@RequestBody TaskRequest dto){
-        return taskService.createTask(dto);
+    // ✅ Создание задачи в проекте
+    @PostMapping("/projects/{projectId}/tasks")
+    public Task createTask(@PathVariable Long projectId, @RequestBody TaskRequest dto) {
+        return taskService.createTask(projectId, dto);
     }
 
-    @DeleteMapping("/deleteTask")
-    public void deleteTask(@RequestBody DeleteTask dto){
-        taskService.deleteTask(dto);
+    // ✅ Удаление задачи в проекте
+    @DeleteMapping("/projects/{projectId}/tasks/{taskId}")
+    public void deleteTask(@PathVariable Long projectId, @PathVariable Long taskId) {
+        taskService.deleteTask(projectId, taskId);
     }
-    @PutMapping("/updateTaskName")
-    public void updateNameTask(@RequestBody UpdateNameTask dto){
-        taskService.updateNameTask(dto);
+
+    // ✅ Обновление имени задачи
+    @PutMapping("/projects/{projectId}/tasks/{taskId}/name")
+    public void updateNameTask(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody UpdateNameTask dto) {
+        taskService.updateNameTask(projectId, taskId, dto);
     }
-    @PutMapping("/updateDescription")
-    public void updateDescriptionTask(@RequestBody UpdateDescription dto){
-        taskService.updateDescriptionTask(dto);
+
+    // ✅ Обновление описания задачи
+    @PutMapping("/projects/{projectId}/tasks/{taskId}/description")
+    public void updateDescriptionTask(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody UpdateDescription dto) {
+        taskService.updateDescriptionTask(projectId, taskId, dto);
     }
-    @PutMapping("/updateStatus")
-    public void updateStatusTask(@RequestBody UpdateStatus dto){
-        taskService.updateStatusTask(dto);
+
+    // ✅ Обновление статуса задачи
+    @PutMapping("/projects/{projectId}/tasks/{taskId}/status")
+    public void updateStatusTask(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody UpdateStatus dto) {
+        taskService.updateStatusTask(projectId, taskId, dto);
     }
+
 
 }

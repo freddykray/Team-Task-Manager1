@@ -10,6 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    List<Project> findAllByOwner(User owner);
-    Optional<Project> findByUserIdAndProjectName(@Param("userId") Long userId, @Param("projectName") String projectName);
+//    List<Project> findAllByOwner(User owner);
+//    Optional<Project> findByUserIdAndProjectName(@Param("owner") Long userId, @Param("projectName") String projectName);
 }

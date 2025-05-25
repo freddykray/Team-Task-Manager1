@@ -23,34 +23,39 @@ public class EntityFinderService implements EntityFinder {
     private final UserRepository userRepository;
     private final UserProjectRepository userProjectRepository;
 
-    public boolean isUserOwner(Project project) {
+    public boolean isUserOwner(Long projectId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+       Project project = findById(projectId);
         User owner = getUserByName(authentication.getName());
         return project.getUserProjects().stream()
                 .anyMatch(up -> up.getUser().equals(owner) && up.getRole() == Role.ROLE_OWNER);
     }
 
-    public boolean isUserOwnerAndAdmin(String projectName) {
+    public boolean isUserOwnerAndAdmin(Long projectId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Project project = (projectName);
+        Project project = findById(projectId);
 
         User user = getUserByName(authentication.getName());
 
         return project.getUserProjects().stream()
                 .anyMatch(up -> up.getUser().equals(user) &&
-                        ( up.getRole() == Role.ROLE_ADMIN ||up.getRole() == Role.ROLE_OWNER));
+                        ( up.getRole() == Role.ROLE_ADMIN || up.getRole() == Role.ROLE_OWNER));
     }
-    public Project getProjectByUserIdAndProjectName(Long id, String project){
-        Project project1 = projectRepository.findByUserIdAndProjectName(id, project)
-                .orElseThrow(() -> new RuntimeException("Проект с таким именем не найден"));
-        return project1;
-    }
+
     public User getUserByName(String user){
         User user1 = userRepository.findUserByUsername(user)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с именем " + user + " не найден"));
         return user1;
     }
+
+    @Override
+    public Project findById(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Проект с таким именем не найден"));
+        return project;
+    }
+
     public List<Project> findProjectsByUser(User user){
         List<Project> projects = userProjectRepository.findAllByUser(user)
                 .stream()
@@ -58,11 +63,12 @@ public class EntityFinderService implements EntityFinder {
                 .collect(Collectors.toList());
         return projects;
     }
-    public Task getTaskInProject(Project project, String dto ){
+    public Task getTaskByIdInProject(Long projectId, Long taskId ){
+        Project project = findById(projectId);
         Task task = project.getProjectTasks().stream()
-                .filter(t -> t.getTitle().equals(dto))
+                .filter(t -> t.getId().equals(taskId))
                 .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Задача с именем " + dto + " в проекте не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException("Задача с именем " + project + " в проекте не найдена"));
         return task;
     }
     public Optional<UserProject> userInProject(User user, Project project) {

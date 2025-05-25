@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class AddUserInProject {
-    private String nameProject;
+
     private String username;
     private Role role;
 }

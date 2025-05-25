@@ -1,7 +1,6 @@
 package com.example.Team.Task.Manager.service;
 
 
-import com.example.Team.Task.Manager.dtoTask.DeleteTask;
 import com.example.Team.Task.Manager.dtoTask.TaskRequest;
 import com.example.Team.Task.Manager.dtoTask.UpdateDescription;
 import com.example.Team.Task.Manager.dtoTask.UpdateNameTask;
@@ -16,8 +15,6 @@ import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.TaskRepository;
 import lombok.AllArgsConstructor;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,12 +29,12 @@ public class TaskService {
     private final EntityFinder entityFinder;
     private final KafkaProducer kafkaProducerService;
 
-    public Task createTask(TaskRequest dto) {
-        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
+    public Task createTask(Long projectId,TaskRequest dto) {
+        if (!entityFinder.isUserOwnerAndAdmin(projectId)) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
 
-        Project project = entityFinder.getProjectByName(dto.getNameProject());
+        Project project = entityFinder.findById(projectId);
         List<Task> tasks = taskRepository.findAllByProject(project);
 
         boolean existTaskName = tasks.stream()
@@ -48,7 +45,6 @@ public class TaskService {
         }
 
         User assignee = entityFinder.getUserByName(dto.getAssignee());
-        Optional<UserProject> userProjectOptional = entityFinder.userInProject(assignee, project);
 
         Task task = new Task();
         task.setTitle(dto.getTitle());
@@ -65,49 +61,52 @@ public class TaskService {
         return savedTask;
     }
 
-    public void deleteTask(DeleteTask dto) {
-        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
+    public void deleteTask(Long projectId, Long taskId) {
+
+
+        if (!entityFinder.isUserOwnerAndAdmin(projectId)) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
 
-        Project project = entityFinder.getProjectByName(dto.getNameProject());
-        Task deleteTask = entityFinder.getTaskInProject(project, dto.getNameTask());
+        Task TaskAndProject = entityFinder.getTaskByIdInProject(projectId, taskId);
 
-        project.getProjectTasks().remove(deleteTask);
-        projectRepository.save(project);
-        taskRepository.delete(deleteTask);
+        TaskAndProject.getProject().getProjectTasks().remove(TaskAndProject);
+        projectRepository.save(TaskAndProject.getProject());
+        taskRepository.delete(TaskAndProject);
     }
 
-    public void updateNameTask(UpdateNameTask dto) {
-        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
+    public void updateNameTask(Long projectId, Long taskId, UpdateNameTask dto) {
+
+        if (!entityFinder.isUserOwnerAndAdmin(projectId)) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
 
-        Project project = entityFinder.getProjectByName(dto.getNameProject());
-        Task task = entityFinder.getTaskInProject(project, dto.getOldNameTask());
+        Task task = entityFinder.getTaskByIdInProject(projectId, taskId);
 
         task.setTitle(dto.getNewNameTask());
         taskRepository.save(task);
     }
 
-    public void updateDescriptionTask(UpdateDescription dto) {
-        if (!entityFinder.isUserOwnerAndAdmin(dto.getNameProject())) {
+    public void updateDescriptionTask(Long projectId, Long taskId,UpdateDescription dto) {
+        if (!entityFinder.isUserOwnerAndAdmin(projectId)) {
             throw new RuntimeException("У вас недостаточно прав!");
         }
 
-        Project project = entityFinder.getProjectByName(dto.getNameProject());
-        Task task = entityFinder.getTaskInProject(project, dto.getNameTask());
+        Task task = entityFinder.getTaskByIdInProject(projectId, taskId);
 
-        task.setDescription(dto.getNewDescription());
+
+            task.setDescription(dto.getNewDescription());
+
+
         taskRepository.save(task);
     }
 
-    public void updateStatusTask(UpdateStatus dto) {
-        Project project = entityFinder.getProjectByName(dto.getProjectName());
-        Task task = entityFinder.getTaskInProject(project, dto.getTitleTask());
+    public void updateStatusTask(Long projectId, Long taskId, UpdateStatus dto) {
+
+        Task task = entityFinder.getTaskByIdInProject(projectId, taskId);
 
         // Получаем текущего пользователя
-        User user = entityFinder.getUserByName(project.getOwnerUsername());
+        User user = entityFinder.getUserByName(task.getProject().getOwnerUsername());
 
         // Подготовка письма
         Mail mail = new Mail();
@@ -115,7 +114,7 @@ public class TaskService {
         mail.setSubject("Team Task Manager");
         mail.setBody(String.format(
                 "В вашем проекте '%s' статус задачи '%s' был изменен на '%s'",
-                project.getName(),
+                task.getProject().getName(),
                 task.getTitle(),
                 dto.getStatus()
         ));

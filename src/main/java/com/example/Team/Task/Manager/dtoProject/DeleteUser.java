@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class DeleteUser {
-    private String nameProject;
+
     private String username;
 }

@@ -25,23 +25,26 @@ public class ProjectController {
         List<ProjectResponse> projects = projectService.allUserProject();
         return ResponseEntity.ok(projects);
     }
-
-    @DeleteMapping("/deleteProject")
-    public void deleteProject(@RequestBody ProjectRequest dto){
-        projectService.deleteProject(dto.getProjectName());
+    @DeleteMapping("/projects/{projectId}/deleteProject")
+    public void deleteProject(@PathVariable Long projectId) {
+        projectService.deleteProject(projectId);
     }
 
-    @PutMapping("/updateName")
-    public void nameProjectUpdate(@RequestBody ProjectRequestUpdate dto){
-        projectService.nameProjectUpdate(dto);
+    @PutMapping("/projects/{projectId}/updateName")
+    public void nameProjectUpdate(@PathVariable Long projectId, @RequestBody ProjectRequestUpdate dto) {
+        projectService.nameProjectUpdate(projectId, dto);
     }
 
-    @PostMapping("/addUser")
-    public void addUserToProject(@RequestBody AddUserInProject dto){
-         projectService.addUserToProject(dto);
+    @PostMapping("/projects/{projectId}/addUser")
+    public void addUserToProject(@PathVariable Long projectId, @RequestBody AddUserInProject dto) {
+
+        projectService.addUserToProject(projectId, dto);
     }
 
-    @DeleteMapping("/deleteUserInProject")
-    public void deleteUser(@RequestBody DeleteUser dto){ projectService.deleteUser(dto);}
+    @DeleteMapping("/projects/{projectId}/deleteUserInProject")
+    public void deleteUser(@PathVariable Long projectId, @RequestBody DeleteUser dto) {
+        projectService.deleteUser(projectId, dto);
+    }
+
 
 }
