@@ -15,9 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 public class DeadlineCheckerService {
 
-    private final TaskRepository taskRepository;
+    private  TaskRepository taskRepository;
 
-    private final KafkaProducer kafkaProducer;
+    private  KafkaProducer kafkaProducer;
 
     @Scheduled(fixedRate = 60 * 60 * 1000)
     public void checkDeadlineTask(){
@@ -33,7 +33,7 @@ public class DeadlineCheckerService {
                 Mail mail = new Mail();
                 mail.setTo(emailAssignee);
                 mail.setSubject("Напоминание о дедлайне");
-                mail.setBody(String.format("Задачи '%s', где вы являетесь исполнителем, истекает через один день", task.getTitle()));
+                mail.setBody(String.format("Задача '%s', в которой вы являетесь исполнителем, истекает через один день", task.getTitle()));
 
                 kafkaProducer.sendMail(mail);
 

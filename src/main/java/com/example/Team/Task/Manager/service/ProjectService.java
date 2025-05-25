@@ -37,7 +37,7 @@ public class ProjectService {
         // Проверка на дублирование имени проекта
         boolean nameExists = entityFinder.findProjectsByUser(user).stream()
                 .anyMatch(project -> project.getName().equals(dto.getProjectName()));
-        if (nameExists) {
+        if (nameExists && user.getRoles() == Role.ROLE_OWNER) {
             throw new RuntimeException("Такое имя уже занято!");
         }
 

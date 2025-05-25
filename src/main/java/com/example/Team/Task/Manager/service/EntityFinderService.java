@@ -33,7 +33,7 @@ public class EntityFinderService implements EntityFinder {
     public boolean isUserOwnerAndAdmin(String projectName) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Project project = getProjectByName(projectName);
+        Project project = (projectName);
 
         User user = getUserByName(authentication.getName());
 
@@ -41,8 +41,8 @@ public class EntityFinderService implements EntityFinder {
                 .anyMatch(up -> up.getUser().equals(user) &&
                         ( up.getRole() == Role.ROLE_ADMIN ||up.getRole() == Role.ROLE_OWNER));
     }
-    public Project getProjectByName(String project){
-        Project project1 = projectRepository.findByName(project)
+    public Project getProjectByUserIdAndProjectName(Long id, String project){
+        Project project1 = projectRepository.findByUserIdAndProjectName(id, project)
                 .orElseThrow(() -> new RuntimeException("Проект с таким именем не найден"));
         return project1;
     }

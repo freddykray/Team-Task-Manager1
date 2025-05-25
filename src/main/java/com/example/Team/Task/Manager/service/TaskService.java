@@ -107,15 +107,14 @@ public class TaskService {
         Task task = entityFinder.getTaskInProject(project, dto.getTitleTask());
 
         // Получаем текущего пользователя
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = entityFinder.getUserByName(authentication.getName());
+        User user = entityFinder.getUserByName(project.getOwnerUsername());
 
         // Подготовка письма
         Mail mail = new Mail();
         mail.setTo(user.getEmail());
         mail.setSubject("Team Task Manager");
         mail.setBody(String.format(
-                "В вашем проекте '%s' статус задачи '%s' был изменен на %s",
+                "В вашем проекте '%s' статус задачи '%s' был изменен на '%s'",
                 project.getName(),
                 task.getTitle(),
                 dto.getStatus()

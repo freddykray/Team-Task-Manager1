@@ -15,7 +15,7 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
 
     List<Task> findAllByProject(Project project);
 
-    @Query("SELECT t FROM Task t WHERE t.date_time BETWEEN :now AND :nextDay")
+    @Query("SELECT t FROM Task t WHERE t.datetime BETWEEN :now AND :nextDay")
     List<Task> findTasksWithDeadlineBetween(@Param("now") LocalDateTime now, @Param("nextDay") LocalDateTime nextDay);
 
 }

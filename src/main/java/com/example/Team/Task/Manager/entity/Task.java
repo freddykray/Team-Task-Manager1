@@ -36,7 +36,7 @@ public class Task {
     @Column(name = "date_time")
     private LocalDateTime datetime;
 
-    @Column
-    private boolean notificationSent;
+    @Column(name = "is_notification_sent")
+    private boolean isNotificationSent;
 
 }

@@ -12,7 +12,7 @@ public interface EntityFinder {
 
     User getUserByName(String username);
 
-    Project getProjectByName(String projectName);
+    Optional<Project> findByUserIdAndProjectName(Long userId,  String projectName);
 
     boolean isUserOwner(Project project);
 
