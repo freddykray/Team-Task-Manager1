@@ -1,14 +1,10 @@
 package com.example.Team.Task.Manager.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "task")
@@ -39,5 +35,8 @@ public class Task {
 
     @Column(name = "date_time")
     private LocalDateTime datetime;
+
+    @Column
+    private boolean notificationSent;
 
 }
