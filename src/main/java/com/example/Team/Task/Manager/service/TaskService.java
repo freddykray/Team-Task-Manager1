@@ -9,7 +9,6 @@ import com.example.Team.Task.Manager.entity.Mail;
 import com.example.Team.Task.Manager.entity.Project;
 import com.example.Team.Task.Manager.entity.Task;
 import com.example.Team.Task.Manager.entity.User;
-import com.example.Team.Task.Manager.entity.UserProject;
 import com.example.Team.Task.Manager.kafka.KafkaProducer;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.TaskRepository;
@@ -18,7 +17,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor

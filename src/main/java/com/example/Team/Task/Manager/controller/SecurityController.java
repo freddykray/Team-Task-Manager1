@@ -4,6 +4,7 @@ import com.example.Team.Task.Manager.dtoProject.SigninRequest;
 import com.example.Team.Task.Manager.dtoProject.SignupRequest;
 import com.example.Team.Task.Manager.entity.Role;
 import com.example.Team.Task.Manager.entity.User;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,35 +21,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.Team.Task.Manager.repository.UserRepository;
 import com.example.Team.Task.Manager.security.JwtCore;
-import com.example.Team.Task.Manager.service.UserService;
+
 
 @RestController
 @RequestMapping("/auth")
+@AllArgsConstructor
 public class SecurityController {
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private AuthenticationManager authenticationManager;
-    private JwtCore jwtCore;
-    private UserService userService;
 
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final UserRepository userRepository;
 
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
-    @Autowired
-    public void setJwtCore(JwtCore jwtCore) {
-        this.jwtCore = jwtCore;
-    }
+    private final AuthenticationManager authenticationManager;
+
+    private final JwtCore jwtCore;
+
+
+
+
+
     @PostMapping("/signup")
     ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest){
         if (userRepository.existsUserByUsername(signupRequest.getUsername())){

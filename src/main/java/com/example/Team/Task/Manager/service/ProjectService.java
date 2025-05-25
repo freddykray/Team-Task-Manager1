@@ -1,7 +1,15 @@
 package com.example.Team.Task.Manager.service;
 
-import com.example.Team.Task.Manager.dtoProject.*;
-import com.example.Team.Task.Manager.entity.*;
+
+import com.example.Team.Task.Manager.dtoProject.AddUserInProject;
+import com.example.Team.Task.Manager.dtoProject.DeleteUser;
+import com.example.Team.Task.Manager.dtoProject.ProjectRequest;
+import com.example.Team.Task.Manager.dtoProject.ProjectRequestUpdate;
+import com.example.Team.Task.Manager.dtoProject.ProjectResponse;
+import com.example.Team.Task.Manager.entity.Project;
+import com.example.Team.Task.Manager.entity.Role;
+import com.example.Team.Task.Manager.entity.User;
+import com.example.Team.Task.Manager.entity.UserProject;
 import com.example.Team.Task.Manager.mapper.ProjectMapper;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.UserProjectRepository;
@@ -136,7 +144,7 @@ public class ProjectService {
     /**
      * Удаление пользователя из проекта владельцем.
      */
-    public void deleteUser(Long projectId,DeleteUser dto) {
+    public void deleteUser(Long projectId, DeleteUser dto) {
         Project project = entityFinder.findById(projectId);
         User user = entityFinder.getUserByName(dto.getUsername());
 

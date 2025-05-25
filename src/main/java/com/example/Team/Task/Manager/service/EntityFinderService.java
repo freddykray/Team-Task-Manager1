@@ -1,12 +1,17 @@
 package com.example.Team.Task.Manager.service;
 
-import com.example.Team.Task.Manager.entity.*;
+
+import com.example.Team.Task.Manager.entity.Project;
+import com.example.Team.Task.Manager.entity.Role;
+import com.example.Team.Task.Manager.entity.Task;
+import com.example.Team.Task.Manager.entity.User;
+import com.example.Team.Task.Manager.entity.UserProject;
 import com.example.Team.Task.Manager.repository.ProjectRepository;
 import com.example.Team.Task.Manager.repository.UserProjectRepository;
 import com.example.Team.Task.Manager.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

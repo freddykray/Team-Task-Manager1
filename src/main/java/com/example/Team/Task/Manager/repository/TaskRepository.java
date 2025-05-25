@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task,Long> {
@@ -19,6 +19,6 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
     @Query("SELECT t FROM Task t WHERE t.datetime BETWEEN :now AND :nextDay")
     List<Task> findTasksWithDeadlineBetween(@Param("now") LocalDateTime now, @Param("nextDay") LocalDateTime nextDay);
 
-//    Optional<Task> findByNameAndProjectId(String name, Long projectId);
+
 
 }
