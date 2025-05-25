@@ -53,7 +53,7 @@ public class ProjectMapper {
         Duration duration = Duration.between(LocalDateTime.now(), task.getDatetime());
 
         taskResponse.setCreatedAt(formatDuration(duration));
-        if (isActive ==false){
+        if (!isActive && taskResponse.getStatus() != TaskStatus.Завершена){
             taskResponse.setStatus(TaskStatus.Просроченна);
         }
 
