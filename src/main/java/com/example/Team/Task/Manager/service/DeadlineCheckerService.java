@@ -19,7 +19,7 @@ public class DeadlineCheckerService {
 
     private  KafkaProducer kafkaProducer;
 
-    @Scheduled(fixedRate = 60 * 60 * 1000)
+    @Scheduled(initialDelay = 0, fixedRate = 60 * 60 * 1000)
     public void checkDeadlineTask(){
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime nextDay = now.plusDays(1);

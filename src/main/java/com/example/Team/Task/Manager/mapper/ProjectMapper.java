@@ -44,21 +44,29 @@ public class ProjectMapper {
     }
 
     public TaskResponse toTaskResponse(Task task){
-        TaskResponse taskResponse = new TaskResponse();
-        taskResponse.setId(task.getId());
-        taskResponse.setTitle(task.getTitle());
-        taskResponse.setDescription(task.getDescription());
-        taskResponse.setStatus(task.getStatus());
-
         Duration duration = Duration.between(LocalDateTime.now(), task.getDatetime());
 
-        taskResponse.setCreatedAt(formatDuration(duration));
-        if (!isActive && taskResponse.getStatus() != TaskStatus.Завершена){
-            taskResponse.setStatus(TaskStatus.Просроченна);
-        }
+        boolean isTaskOverdue = duration.isNegative() || duration.isZero();
 
-        taskResponse.setAssignee(task.getAssignee().getUsername());
-        return taskResponse;
+            TaskResponse taskResponse = new TaskResponse();
+            taskResponse.setId(task.getId());
+            taskResponse.setTitle(task.getTitle());
+            taskResponse.setDescription(task.getDescription());
+            taskResponse.setStatus(task.getStatus());
+
+        if (isTaskOverdue && task.getStatus() != TaskStatus.Завершена) {
+            taskResponse.setStatus(TaskStatus.Просроченна);
+        } else {
+            taskResponse.setStatus(task.getStatus());
+        }
+        if (!isTaskOverdue) {
+            taskResponse.setCreatedAt(formatDuration(duration));
+        }
+            taskResponse.setAssignee(task.getAssignee().getUsername());
+
+            return taskResponse;
+
+
     }
 
     public ProjectRoleResponse toProjectRoleResponse(UserProject projectRole){
@@ -75,17 +83,16 @@ public class ProjectMapper {
         long minutes = duration.toMinutes() % 60;
         long seconds = duration.toSeconds() % 60;
 
-        if (days == 0){
-            return String.format(" Осталось %d ч. %d мин.", hours, minutes);
-        } else if (hours == 0) {
-            return String.format(" Осталось %d мин.", minutes);
-        } else if (minutes == 0) {
-            return String.format(" Осталось %d секунд", seconds);
-        } else if (seconds == 0) {
-            isActive = false;
-
+        // Если задача уже завершена (нет ни секунд, ни минут, ни часов, ни дней)
+        if (days > 0) {
+            return String.format("Осталось %d дн. %d ч. %d мин.", days, hours, minutes);
+        } else if (hours > 0) {
+            return String.format("Осталось %d ч. %d мин.", hours, minutes);
+        } else if (minutes > 0) {
+            return String.format("Осталось %d мин.", minutes);
+        } else {
+            return String.format("Осталось %d сек.", seconds);
         }
-        return String.format(" Осталось %d дн. %d ч. %d мин.", days, hours, minutes);
     }
 
 
